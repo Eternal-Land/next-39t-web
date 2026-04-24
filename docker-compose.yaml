@@ -1,0 +1,14 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: 39t_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:3306
+    volumes:
+      - 39t_db_data:/var/lib/mysql
+
+volumes:
+  39t_db_data:
