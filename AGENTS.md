@@ -47,6 +47,7 @@ bunx prisma studio
 
 - Always update AGENTS.md when user requests contain new rules, changes in structure, or workflow updates
 - Always use shadcn with Tailwind CSS when coding UI. Install components if they don't exist via `npx shadcn@latest add [component]`
+- When creating a server component, also create its corresponding client component for frontend logic/hooks.
 
 ## Environment Required
 
