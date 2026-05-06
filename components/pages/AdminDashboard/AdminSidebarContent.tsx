@@ -6,8 +6,8 @@ import {
   HomeIcon,
   NotebookPenIcon,
   PlaneLandingIcon,
-  SettingsIcon,
-  UsersIcon,
+  // SettingsIcon,
+  // UsersIcon,
 } from "lucide-react";
 
 import {
@@ -36,16 +36,16 @@ const navItems = [
     url: "/admin/posts",
     icon: NotebookPenIcon,
   },
-  {
-    title: "Users",
-    url: "/admin/users",
-    icon: UsersIcon,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: SettingsIcon,
-  },
+  // {
+  //   title: "Users",
+  //   url: "/admin/users",
+  //   icon: UsersIcon,
+  // },
+  // {
+  //   title: "Settings",
+  //   url: "/admin/settings",
+  //   icon: SettingsIcon,
+  // },
 ];
 
 export default function AdminSidebarContent() {
