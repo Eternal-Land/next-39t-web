@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -79,11 +78,11 @@ model Verification {
 // Landing Page Models
 
 model Project {
-  id          String   @id @default(cuid())
+  id          Int      @id @default(autoincrement())
   title       String
   description String   @db.Text
   /// [String[]]
-  tags        Json     @db.Json @default("[]")
+  tags        Json     @default("[]") @db.Json
   icon        String // "rocket" | "sparkles" | "globe" | "code"
   order       Int      @default(0)
   createdAt   DateTime @default(now())
@@ -93,7 +92,7 @@ model Project {
 }
 
 model TeamMember {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   name      String
   role      String
   avatar    String?  @db.Text
@@ -134,9 +133,19 @@ enum LandingPageInfoKey {
 }
 
 model LandingPageInfo {
-  id    String             @id @default(cuid())
+  id    Int                @id @default(autoincrement())
   key   LandingPageInfoKey @unique
   value String             @db.Text
 
   @@map("landing_page_info")
+}
+
+model Post {
+  id           Int      @id @default(autoincrement())
+  slug         String   @unique
+  title        String
+  content      String   @db.Text
+  shortContent String   @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

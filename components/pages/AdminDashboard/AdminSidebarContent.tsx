@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
+  NotebookPenIcon,
   PlaneLandingIcon,
   SettingsIcon,
   UsersIcon,
@@ -29,6 +30,11 @@ const navItems = [
     title: "Landing Page",
     url: "/admin/landing",
     icon: PlaneLandingIcon,
+  },
+  {
+    title: "Posts",
+    url: "/admin/posts",
+    icon: NotebookPenIcon,
   },
   {
     title: "Users",

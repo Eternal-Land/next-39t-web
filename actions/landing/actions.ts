@@ -36,7 +36,7 @@ export async function upsertLandingPageInfo(key: LandingPageInfoKey, value: stri
 
 export async function upsertLandingPageInfoBatch(data: LandingPageInfoMap) {
     const entries = Object.entries(data) as [LandingPageInfoKey, string][];
-    
+
     await Promise.all(
         entries.map(([key, value]) =>
             prisma.landingPageInfo.upsert({
@@ -57,7 +57,7 @@ export async function upsertLandingPageInfoBatch(data: LandingPageInfoMap) {
 
 export async function getHeroSection(): Promise<HeroFormData | null> {
     const info = await getLandingPageInfo();
-    
+
     // Check if we have hero data
     if (!info.hero_title) {
         return null;
@@ -92,7 +92,7 @@ export async function upsertHeroSection(data: HeroFormData) {
 
 export async function getContactSection(): Promise<ContactFormData | null> {
     const info = await getLandingPageInfo();
-    
+
     // Check if we have contact data
     if (!info.contact_title && !info.contact_email) {
         return null;
@@ -156,7 +156,7 @@ export async function createProject(data: ProjectInput) {
     return project;
 }
 
-export async function updateProject(id: string, data: ProjectInput) {
+export async function updateProject(id: number, data: ProjectInput) {
     const project = await prisma.project.update({
         where: { id },
         data,
@@ -168,7 +168,7 @@ export async function updateProject(id: string, data: ProjectInput) {
     return project;
 }
 
-export async function deleteProject(id: string) {
+export async function deleteProject(id: number) {
     await prisma.project.delete({ where: { id } });
 
     revalidatePath("/");
@@ -199,7 +199,7 @@ export async function createTeamMember(data: TeamMemberInput) {
     return member;
 }
 
-export async function updateTeamMember(id: string, data: TeamMemberInput) {
+export async function updateTeamMember(id: number, data: TeamMemberInput) {
     const member = await prisma.teamMember.update({
         where: { id },
         data,
@@ -211,7 +211,7 @@ export async function updateTeamMember(id: string, data: TeamMemberInput) {
     return member;
 }
 
-export async function deleteTeamMember(id: string) {
+export async function deleteTeamMember(id: number) {
     await prisma.teamMember.delete({ where: { id } });
 
     revalidatePath("/");
