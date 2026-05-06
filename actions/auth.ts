@@ -24,6 +24,3 @@ export async function initAdminAccount() {
         }
     });
 }
-
-// Run init admin account run when this page first call
-initAdminAccount();

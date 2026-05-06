@@ -1,33 +1,33 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { useForm } from "react-hook-form"
-import z from "zod"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { authClient } from "@/lib/auth-client"
-import { zodResolver } from "@hookform/resolvers/zod"
+} from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
-})
+});
 
-type LoginFormData = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function AdminLoginPageClient() {
-  const router = useRouter()
-  const [error, setError] = React.useState<string>("")
+  const router = useRouter();
+  const [error, setError] = React.useState<string>("");
 
   const {
     register,
@@ -35,20 +35,24 @@ export default function AdminLoginPageClient() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setError("")
-      await authClient.signIn.email({
+      setError("");
+      const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
-      })
-      router.push("/admin")
+      });
+      if (result.error) {
+        setError(result.error.message || "Login failed");
+      } else {
+        router.push("/admin");
+      }
     } catch {
-      setError("Invalid email or password")
+      setError("Invalid email or password");
     }
-  }
+  };
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -61,7 +65,12 @@ export default function AdminLoginPageClient() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="flex flex-col gap-4"
+            >
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -71,7 +80,9 @@ export default function AdminLoginPageClient() {
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -89,8 +100,6 @@ export default function AdminLoginPageClient() {
                 )}
               </div>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
-
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Logging in..." : "Login"}
               </Button>
@@ -99,5 +108,5 @@ export default function AdminLoginPageClient() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

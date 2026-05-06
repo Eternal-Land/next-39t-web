@@ -1,6 +1,14 @@
-import { Button } from "@/components/ui/button";
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import AdminSidebar from "@/components/pages/AdminDashboard/AdminSidebar";
+import { auth } from "@/lib/auth";
 
 export default async function AdminDashboardLayout({
   children,
@@ -8,19 +16,24 @@ export default async function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const data = await auth.api.getSession({
-    headers: await headers()
-  })
+    headers: await headers(),
+  });
+
+  if (!data?.user) {
+    redirect("/admin/login");
+  }
 
   return (
-    <div>
-      <h1>Admin Dashboard Layout</h1>
-      {data?.user && (
-        <div>
-          <p>Hello {data.user.name}!</p>
-          <Button>Logout</Button>
-        </div>
-      )}
-      <div>{children}</div>
-    </div>
+    <SidebarProvider>
+      <AdminSidebar user={data.user} />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <span className="text-sm font-medium">Admin Dashboard</span>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

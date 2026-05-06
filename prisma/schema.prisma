@@ -4,6 +4,10 @@ generator client {
   output   = "../generated/prisma"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 datasource db {
   provider     = "mysql"
   relationMode = "prisma"
@@ -70,4 +74,69 @@ model Verification {
 
   @@index([identifier(length: 191)])
   @@map("verification")
+}
+
+// Landing Page Models
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  /// [String[]]
+  tags        Json     @db.Json @default("[]")
+  icon        String // "rocket" | "sparkles" | "globe" | "code"
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("project")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  avatar    String?  @db.Text
+  initials  String
+  github    String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_member")
+}
+
+enum LandingPageInfoKey {
+  // Hero section
+  hero_title
+  hero_subtitle
+  hero_primary_button_text
+  hero_primary_button_link
+  hero_secondary_button_text
+  hero_secondary_button_link
+
+  // Contact section
+  contact_title
+  contact_subtitle
+  contact_email
+  contact_github
+  contact_facebook
+  contact_youtube
+
+  // Projects section
+  projects_title
+  projects_subtitle
+
+  // Team section
+  team_badge
+  team_title
+  team_subtitle
+}
+
+model LandingPageInfo {
+  id    String             @id @default(cuid())
+  key   LandingPageInfoKey @unique
+  value String             @db.Text
+
+  @@map("landing_page_info")
 }
