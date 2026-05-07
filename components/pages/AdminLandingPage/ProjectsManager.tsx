@@ -15,6 +15,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -106,8 +107,10 @@ export default function ProjectsManager({
         projects_title: sectionTitle,
         projects_subtitle: sectionSubtitle,
       });
+      toast.success("Section header saved successfully!");
     } catch (error) {
       console.error("Failed to save section:", error);
+      toast.error("Failed to save section header");
     } finally {
       setIsSectionLoading(false);
     }
@@ -186,16 +189,19 @@ export default function ProjectsManager({
         setProjects(
           projects.map((p) => (p.id === editingProject.id ? updated : p)),
         );
+        toast.success("Project updated successfully!");
       } else {
         const created = await createProject({
           ...data,
           tags,
         });
         setProjects([...projects, created]);
+        toast.success("Project created successfully!");
       }
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Failed to save project:", error);
+      toast.error("Failed to save project");
     } finally {
       setIsLoading(false);
     }
@@ -209,8 +215,10 @@ export default function ProjectsManager({
       await deleteProject(deletingProject.id);
       setProjects(projects.filter((p) => p.id !== deletingProject.id));
       setIsDeleteDialogOpen(false);
+      toast.success("Project deleted successfully!");
     } catch (error) {
       console.error("Failed to delete project:", error);
+      toast.error("Failed to delete project");
     } finally {
       setIsLoading(false);
     }

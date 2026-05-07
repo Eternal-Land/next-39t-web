@@ -1,6 +1,11 @@
 "use client";
 
-import { createPost, PostFormData, postSchema } from "@/actions/posts";
+import {
+  createPost,
+  updatePost,
+  PostFormData,
+  postSchema,
+} from "@/actions/posts";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -9,11 +14,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Post } from "@/generated/prisma/browser";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@monaco-editor/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export interface WritePostPageClientProps {
   post?: Post;
@@ -49,11 +56,17 @@ export default function WritePostPageClient({
   const handleFormSubmit = async (values: PostFormData) => {
     try {
       values.content = localContent;
-      const postId = await createPost(values);
-      //   window.localStorage.removeItem("localPostContent");
-      window.location.href = `/admin/posts/write/${postId}`;
+      if (post) {
+        await updatePost(post.id, values);
+        toast.success("Post updated successfully!");
+      } else {
+        const postId = await createPost(values);
+        toast.success("Post created successfully!");
+        window.location.href = `/admin/posts/write/${postId}`;
+      }
     } catch (error) {
-      console.error("Failed to create post:", error);
+      console.error("Failed to save post:", error);
+      toast.error("Failed to save post");
     }
   };
 
@@ -102,7 +115,7 @@ export default function WritePostPageClient({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="gap-1">
               <FieldLabel htmlFor="shortContentInput">Short Content</FieldLabel>
-              <Input
+              <Textarea
                 {...field}
                 id="shortContentInput"
                 aria-invalid={fieldState.invalid}

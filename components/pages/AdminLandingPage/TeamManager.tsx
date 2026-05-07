@@ -5,6 +5,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -86,8 +87,10 @@ export default function TeamManager({
         team_title: sectionTitle,
         team_subtitle: sectionSubtitle,
       });
+      toast.success("Section header saved successfully!");
     } catch (error) {
       console.error("Failed to save section:", error);
+      toast.error("Failed to save section header");
     } finally {
       setIsSectionLoading(false);
     }
@@ -175,13 +178,16 @@ export default function TeamManager({
         setMembers(
           members.map((m) => (m.id === editingMember.id ? updated : m)),
         );
+        toast.success("Team member updated successfully!");
       } else {
         const created = await createTeamMember(memberData);
         setMembers([...members, created]);
+        toast.success("Team member added successfully!");
       }
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Failed to save team member:", error);
+      toast.error("Failed to save team member");
     } finally {
       setIsLoading(false);
     }
@@ -195,8 +201,10 @@ export default function TeamManager({
       await deleteTeamMember(deletingMember.id);
       setMembers(members.filter((m) => m.id !== deletingMember.id));
       setIsDeleteDialogOpen(false);
+      toast.success("Team member deleted successfully!");
     } catch (error) {
       console.error("Failed to delete team member:", error);
+      toast.error("Failed to delete team member");
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,6 @@ type HeroSectionFormProps = {
 
 export default function HeroSectionForm({ initialData }: HeroSectionFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [successMessage, setSuccessMessage] = React.useState("");
 
   const {
     register,
@@ -45,14 +45,13 @@ export default function HeroSectionForm({ initialData }: HeroSectionFormProps) {
 
   const onSubmit = async (data: HeroFormData) => {
     setIsLoading(true);
-    setSuccessMessage("");
 
     try {
       await upsertHeroSection(data);
-      setSuccessMessage("Hero section saved successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000);
+      toast.success("Hero section saved successfully!");
     } catch (error) {
       console.error("Failed to save hero section:", error);
+      toast.error("Failed to save hero section");
     } finally {
       setIsLoading(false);
     }
@@ -158,9 +157,6 @@ export default function HeroSectionForm({ initialData }: HeroSectionFormProps) {
               {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
               Save Changes
             </Button>
-            {successMessage && (
-              <p className="text-sm text-green-600">{successMessage}</p>
-            )}
           </div>
         </form>
       </CardContent>
