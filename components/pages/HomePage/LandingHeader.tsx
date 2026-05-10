@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 const navLinks = [
-  { href: "#projects", label: "Projects" },
-  { href: "#posts", label: "Posts" },
-  { href: "#team", label: "Team" },
-  { href: "#contact", label: "Contact" },
+  { href: "/", label: "Home" },
+  { href: "/posts", label: "Posts" },
 ];
 
 export default function LandingHeader() {
@@ -19,13 +17,13 @@ export default function LandingHeader() {
         </Link>
         <nav className="hidden items-center gap-6 text-sm md:flex">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div></div>
