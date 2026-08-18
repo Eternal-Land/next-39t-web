@@ -138,6 +138,13 @@ export async function upsertContactSection(data: ContactFormData) {
 
 export async function getProjects() {
     return prisma.project.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+    });
+}
+
+export async function getAllProjects() {
+    return prisma.project.findMany({
         orderBy: { order: "asc" },
     });
 }
@@ -147,6 +154,7 @@ export async function createProject(data: ProjectInput) {
         data: {
             ...data,
             order: data.order ?? 0,
+            isActive: data.isActive ?? true,
         },
     });
 
@@ -181,6 +189,13 @@ export async function deleteProject(id: number) {
 
 export async function getTeamMembers() {
     return prisma.teamMember.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+    });
+}
+
+export async function getAllTeamMembers() {
+    return prisma.teamMember.findMany({
         orderBy: { order: "asc" },
     });
 }
@@ -190,6 +205,7 @@ export async function createTeamMember(data: TeamMemberInput) {
         data: {
             ...data,
             order: data.order ?? 0,
+            isActive: data.isActive ?? true,
         },
     });
 

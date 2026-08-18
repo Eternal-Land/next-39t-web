@@ -50,14 +50,18 @@ export const projectSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
     tags: z.array(z.string()),
-    icon: z.string().min(1, "Icon is required"),
+    iconUrl: z.string().min(1, "Icon is required"),
     order: z.number().min(0),
+    isActive: z.boolean(),
 });
 
 export type ProjectFormData = z.infer<typeof projectSchema>;
 
 // Input type for create/update operations (optional fields have defaults in actions)
-export type ProjectInput = Omit<ProjectFormData, "order"> & { order?: number };
+export type ProjectInput = Omit<ProjectFormData, "order" | "isActive"> & {
+    order?: number;
+    isActive?: boolean;
+};
 
 // =============================================================================
 // Team Member
@@ -70,9 +74,13 @@ export const teamMemberSchema = z.object({
     initials: z.string().min(1, "Initials are required").max(3, "Max 3 characters"),
     github: z.string().optional(),
     order: z.number().min(0),
+    isActive: z.boolean(),
 });
 
 export type TeamMemberFormData = z.infer<typeof teamMemberSchema>;
 
 // Input type for create/update operations (optional fields have defaults in actions)
-export type TeamMemberInput = Omit<TeamMemberFormData, "order"> & { order?: number };
+export type TeamMemberInput = Omit<TeamMemberFormData, "order" | "isActive"> & {
+    order?: number;
+    isActive?: boolean;
+};

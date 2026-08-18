@@ -83,8 +83,9 @@ model Project {
   description String   @db.Text
   /// [String[]]
   tags        Json     @default("[]") @db.Json
-  icon        String // "rocket" | "sparkles" | "globe" | "code"
+  iconUrl     String // uploaded icon/image URL
   order       Int      @default(0)
+  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -99,6 +100,7 @@ model TeamMember {
   initials  String
   github    String?
   order     Int      @default(0)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

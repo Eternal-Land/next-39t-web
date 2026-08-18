@@ -4,17 +4,7 @@ import * as React from "react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Code,
-  Globe,
-  Loader2,
-  Pencil,
-  Plus,
-  Rocket,
-  Sparkles,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Loader2, Pencil, Plus, Rocket, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -54,19 +45,8 @@ import {
   projectSchema,
   ProjectFormData,
 } from "@/actions/landing";
+import { uploadImage } from "@/actions/upload";
 import { Project } from "@/generated/prisma/browser";
-
-const iconOptions = [
-  { value: "rocket", label: "Rocket", Icon: Rocket },
-  { value: "sparkles", label: "Sparkles", Icon: Sparkles },
-  { value: "globe", label: "Globe", Icon: Globe },
-  { value: "code", label: "Code", Icon: Code },
-];
-
-const getIconComponent = (iconName: string) => {
-  const icon = iconOptions.find((i) => i.value === iconName);
-  return icon?.Icon || Rocket;
-};
 
 type ProjectsManagerProps = {
   initialData: Project[];
@@ -88,15 +68,17 @@ export default function ProjectsManager({
   );
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSectionLoading, setIsSectionLoading] = React.useState(false);
+  const [isIconUploading, setIsIconUploading] = React.useState(false);
   const [tags, setTags] = React.useState<string[]>([]);
   const [newTag, setNewTag] = React.useState("");
 
   // Section header form
   const [sectionTitle, setSectionTitle] = React.useState(
-    sectionInfo.projects_title ?? "Featured Projects"
+    sectionInfo.projects_title ?? "Featured Projects",
   );
   const [sectionSubtitle, setSectionSubtitle] = React.useState(
-    sectionInfo.projects_subtitle ?? "Some of our recent work that we're proud of"
+    sectionInfo.projects_subtitle ??
+      "Some of our recent work that we're proud of",
   );
 
   const onSubmitSection = async (e: React.FormEvent) => {
@@ -122,6 +104,7 @@ export default function ProjectsManager({
     register,
     handleSubmit,
     reset,
+    watch,
     setValue,
     formState: { errors },
   } = useForm<ProjectFormData>({
@@ -130,10 +113,31 @@ export default function ProjectsManager({
       title: "",
       description: "",
       tags: [],
-      icon: "rocket",
+      iconUrl: "",
       order: 0,
+      isActive: true,
     },
   });
+
+  const watchIcon = watch("iconUrl");
+  const watchIsActive = watch("isActive");
+
+  const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsIconUploading(true);
+    try {
+      const url = await uploadImage(file, "project-icon");
+      setValue("iconUrl", url);
+    } catch (error) {
+      console.error("Failed to upload icon:", error);
+      toast.error("Failed to upload icon");
+    } finally {
+      setIsIconUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const openCreateDialog = () => {
     setEditingProject(null);
@@ -142,8 +146,9 @@ export default function ProjectsManager({
       title: "",
       description: "",
       tags: [],
-      icon: "rocket",
+      iconUrl: "",
       order: projects.length,
+      isActive: true,
     });
     setIsDialogOpen(true);
   };
@@ -155,8 +160,9 @@ export default function ProjectsManager({
       title: project.title,
       description: project.description,
       tags: project.tags,
-      icon: project.icon,
+      iconUrl: project.iconUrl,
       order: project.order,
+      isActive: project.isActive,
     });
     setIsDialogOpen(true);
   };
@@ -295,17 +301,22 @@ export default function ProjectsManager({
                   <TableHead>Title</TableHead>
                   <TableHead className="hidden md:table-cell">Tags</TableHead>
                   <TableHead className="w-12">Order</TableHead>
+                  <TableHead className="w-20">Active</TableHead>
                   <TableHead className="w-24 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {projects.map((project) => {
-                  const IconComponent = getIconComponent(project.icon);
                   return (
                     <TableRow key={project.id}>
                       <TableCell>
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                          <IconComponent className="size-4" />
+                        <div className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={project.iconUrl}
+                            alt={project.title}
+                            className="size-full object-cover"
+                          />
                         </div>
                       </TableCell>
                       <TableCell>
@@ -335,6 +346,13 @@ export default function ProjectsManager({
                         </div>
                       </TableCell>
                       <TableCell>{project.order}</TableCell>
+                      <TableCell>
+                        {project.isActive ? (
+                          <Badge>Active</Badge>
+                        ) : (
+                          <Badge variant="outline">Hidden</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button
@@ -409,22 +427,50 @@ export default function ProjectsManager({
             </div>
 
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {iconOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="flex flex-col gap-1 h-auto py-2"
-                    onClick={() => setValue("icon", option.value)}
-                  >
-                    <option.Icon className="size-4" />
-                    <span className="text-xs">{option.label}</span>
-                  </Button>
-                ))}
+              <Label htmlFor="iconUrl">Icon</Label>
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary">
+                  {watchIcon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={watchIcon}
+                      alt="Icon preview"
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <Rocket className="size-4" />
+                  )}
+                </div>
+                <Input
+                  id="iconUrl"
+                  type="file"
+                  accept="image/*"
+                  disabled={isIconUploading}
+                  onChange={handleIconChange}
+                />
+                {isIconUploading && (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                )}
               </div>
+              {errors.iconUrl && (
+                <p className="text-sm text-destructive">
+                  {errors.iconUrl.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="isActive">Show on landing page</Label>
+                <p className="text-sm text-muted-foreground">
+                  Only active projects are displayed to visitors.
+                </p>
+              </div>
+              <Switch
+                id="isActive"
+                checked={watchIsActive}
+                onCheckedChange={(checked) => setValue("isActive", checked)}
+              />
             </div>
 
             <div className="space-y-2">
@@ -448,7 +494,11 @@ export default function ProjectsManager({
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-2">
                   {tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="gap-1 pr-1.5">
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="gap-1 pr-1.5"
+                    >
                       {tag}
                       <button
                         type="button"
@@ -471,7 +521,7 @@ export default function ProjectsManager({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || isIconUploading}>
                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {editingProject ? "Save Changes" : "Add Project"}
               </Button>

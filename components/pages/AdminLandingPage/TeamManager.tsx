@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +46,7 @@ import {
   teamMemberSchema,
   TeamMemberFormData,
 } from "@/actions/landing";
+import { uploadImage } from "@/actions/upload";
 import { TeamMember } from "@/generated/prisma/browser";
 
 type TeamManagerProps = {
@@ -66,16 +69,17 @@ export default function TeamManager({
   );
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSectionLoading, setIsSectionLoading] = React.useState(false);
+  const [isAvatarUploading, setIsAvatarUploading] = React.useState(false);
 
   // Section header form
   const [sectionBadge, setSectionBadge] = React.useState(
-    sectionInfo.team_badge ?? "Our Team"
+    sectionInfo.team_badge ?? "Our Team",
   );
   const [sectionTitle, setSectionTitle] = React.useState(
-    sectionInfo.team_title ?? "Meet the Developers"
+    sectionInfo.team_title ?? "Meet the Developers",
   );
   const [sectionSubtitle, setSectionSubtitle] = React.useState(
-    sectionInfo.team_subtitle ?? "Young, passionate, and always learning"
+    sectionInfo.team_subtitle ?? "Young, passionate, and always learning",
   );
 
   const onSubmitSection = async (e: React.FormEvent) => {
@@ -112,10 +116,30 @@ export default function TeamManager({
       initials: "",
       github: "",
       order: 0,
+      isActive: true,
     },
   });
 
   const watchName = watch("name");
+  const watchAvatar = watch("avatar");
+  const watchIsActive = watch("isActive");
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsAvatarUploading(true);
+    try {
+      const url = await uploadImage(file, "avatar");
+      setValue("avatar", url);
+    } catch (error) {
+      console.error("Failed to upload avatar:", error);
+      toast.error("Failed to upload avatar");
+    } finally {
+      setIsAvatarUploading(false);
+      e.target.value = "";
+    }
+  };
 
   // Auto-generate initials from name
   React.useEffect(() => {
@@ -138,6 +162,7 @@ export default function TeamManager({
       initials: "",
       github: "",
       order: members.length,
+      isActive: true,
     });
     setIsDialogOpen(true);
   };
@@ -151,6 +176,7 @@ export default function TeamManager({
       initials: member.initials,
       github: member.github || "",
       order: member.order,
+      isActive: member.isActive,
     });
     setIsDialogOpen(true);
   };
@@ -171,6 +197,7 @@ export default function TeamManager({
         initials: data.initials,
         github: data.github || undefined,
         order: data.order,
+        isActive: data.isActive,
       };
 
       if (editingMember) {
@@ -292,6 +319,7 @@ export default function TeamManager({
                   <TableHead>Role</TableHead>
                   <TableHead className="hidden md:table-cell">GitHub</TableHead>
                   <TableHead className="w-12">Order</TableHead>
+                  <TableHead className="w-20">Active</TableHead>
                   <TableHead className="w-24 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -326,6 +354,13 @@ export default function TeamManager({
                       )}
                     </TableCell>
                     <TableCell>{member.order}</TableCell>
+                    <TableCell>
+                      {member.isActive ? (
+                        <Badge>Active</Badge>
+                      ) : (
+                        <Badge variant="outline">Hidden</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button
@@ -402,12 +437,23 @@ export default function TeamManager({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="avatar">Avatar URL (optional)</Label>
-              <Input
-                id="avatar"
-                placeholder="https://example.com/avatar.jpg"
-                {...register("avatar")}
-              />
+              <Label htmlFor="avatar">Avatar (optional)</Label>
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={watchAvatar || ""} alt="Avatar preview" />
+                  <AvatarFallback>{watch("initials") || "?"}</AvatarFallback>
+                </Avatar>
+                <Input
+                  id="avatar"
+                  type="file"
+                  accept="image/*"
+                  disabled={isAvatarUploading}
+                  onChange={handleAvatarChange}
+                />
+                {isAvatarUploading && (
+                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -429,6 +475,20 @@ export default function TeamManager({
               />
             </div>
 
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="isActive">Show on landing page</Label>
+                <p className="text-sm text-muted-foreground">
+                  Only active team members are displayed to visitors.
+                </p>
+              </div>
+              <Switch
+                id="isActive"
+                checked={watchIsActive}
+                onCheckedChange={(checked) => setValue("isActive", checked)}
+              />
+            </div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -437,7 +497,7 @@ export default function TeamManager({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading || isAvatarUploading}>
                 {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
                 {editingMember ? "Save Changes" : "Add Member"}
               </Button>

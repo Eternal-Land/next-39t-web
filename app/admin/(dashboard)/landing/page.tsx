@@ -1,20 +1,21 @@
 import {
   getHeroSection,
-  getProjects,
-  getTeamMembers,
+  getAllProjects,
+  getAllTeamMembers,
   getContactSection,
   getLandingPageInfo,
 } from "@/actions/landing";
 import AdminLandingPageClient from "@/components/pages/AdminLandingPage/AdminLandingPageClient";
 
 export default async function AdminLandingPage() {
-  const [heroSection, projects, teamMembers, contactSection, landingPageInfo] = await Promise.all([
-    getHeroSection(),
-    getProjects(),
-    getTeamMembers(),
-    getContactSection(),
-    getLandingPageInfo(),
-  ]);
+  const [heroSection, projects, teamMembers, contactSection, landingPageInfo] =
+    await Promise.all([
+      getHeroSection(),
+      getAllProjects(),
+      getAllTeamMembers(),
+      getContactSection(),
+      getLandingPageInfo(),
+    ]);
 
   return (
     <AdminLandingPageClient

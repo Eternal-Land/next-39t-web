@@ -1,5 +1,3 @@
-import { Code, Globe, Rocket, Sparkles, type LucideIcon } from "lucide-react";
-
 import {
   Card,
   CardContent,
@@ -10,13 +8,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { getProjects, getLandingPageInfo } from "@/actions/landing";
 
-const iconMap: Record<string, LucideIcon> = {
-  rocket: Rocket,
-  sparkles: Sparkles,
-  globe: Globe,
-  code: Code,
-};
-
 // Default data for when database is empty
 const defaultProjects = [
   {
@@ -25,7 +16,7 @@ const defaultProjects = [
     description:
       "A modern e-commerce solution with real-time inventory and seamless checkout experience.",
     tags: ["Next.js", "Prisma", "Stripe"],
-    icon: "rocket",
+    iconUrl: "/file.svg",
     order: 0,
   },
   {
@@ -34,7 +25,7 @@ const defaultProjects = [
     description:
       "Collaborative task management with real-time updates and team analytics.",
     tags: ["React", "Node.js", "Socket.io"],
-    icon: "sparkles",
+    iconUrl: "/window.svg",
     order: 1,
   },
   {
@@ -43,7 +34,7 @@ const defaultProjects = [
     description:
       "Scalable API gateway with rate limiting, caching, and comprehensive monitoring.",
     tags: ["Go", "Redis", "Docker"],
-    icon: "globe",
+    iconUrl: "/globe.svg",
     order: 2,
   },
 ];
@@ -72,15 +63,19 @@ export default async function LandingProjects() {
 
         <div className="mx-auto flex max-w-6xl flex-wrap items-stretch justify-center gap-6">
           {projects.map((project) => {
-            const IconComponent = iconMap[project.icon.toLowerCase()] || Rocket;
             return (
               <Card
                 key={project.id}
                 className="group w-full max-w-[320px] transition-all hover:shadow-lg"
               >
                 <CardHeader>
-                  <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <IconComponent className="size-5" />
+                  <div className="mb-2 flex size-10 items-center justify-center overflow-hidden rounded-lg bg-primary/10 text-primary">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={project.iconUrl}
+                      alt={project.title}
+                      className="size-full object-cover"
+                    />
                   </div>
                   <CardTitle className="group-hover:text-primary">
                     {project.title}

@@ -1,0 +1,1 @@
+export type UploadFolder = "avatar" | "project-icon"
